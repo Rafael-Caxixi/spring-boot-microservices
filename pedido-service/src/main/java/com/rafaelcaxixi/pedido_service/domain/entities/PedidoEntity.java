@@ -22,4 +22,10 @@ public class PedidoEntity {
     @Column(name = "valor_total", nullable = false)
     private Double valorTotal;
 
+    public PedidoEntity(Long idCliente, Double valorTotal) {
+        this.idCliente = idCliente;
+        this.valorTotal = valorTotal;
+        this.status = "AGUARDANDO PAGAMENTO";
+    }
+
 }

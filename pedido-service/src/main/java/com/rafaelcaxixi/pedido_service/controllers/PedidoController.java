@@ -21,9 +21,9 @@ public class PedidoController {
         this.pedidoService = pedidoService;
     }
 
-//    @PostMapping
-//    public ResponseEntity<PedidoResponseDTO> criarPedido(@RequestBody @Valid PedidoRequestDTO pedidoRequestDTO) {
-//
-//    }
+    @PostMapping
+    public ResponseEntity<PedidoResponseDTO> criarPedido(@RequestBody @Valid PedidoRequestDTO pedidoRequestDTO) {
+        return ResponseEntity.ok(pedidoService.cadastrarPedido(pedidoRequestDTO));
+    }
 
 }
