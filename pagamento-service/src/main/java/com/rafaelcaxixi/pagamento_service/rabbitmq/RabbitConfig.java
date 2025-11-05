@@ -22,7 +22,7 @@ public class RabbitConfig {
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
-        CachingConnectionFactory factory = new CachingConnectionFactory("localhost");
+        CachingConnectionFactory factory = new CachingConnectionFactory("rabbitmq");
         factory.setUsername("guest");
         factory.setPassword("guest");
         factory.setPort(5672);

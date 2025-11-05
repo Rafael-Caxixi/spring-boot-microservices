@@ -8,3 +8,157 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - loja_network
+
+
+  #------------------------------------ USUARIOS ------------------------------------
+  db-usuario:
+    image: postgres:16-alpine
+    container_name: db-usuario
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: db_usuario
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./data/postgres_data/usuario:/var/lib/postgresql/data
+    networks:
+      - loja_network
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  usuario-service:
+    build:
+      context: .
+      dockerfile: ./usuario-service/Dockerfile
+    container_name: usuario-service
+    ports:
+      - "8081:8081"
+    environment:
+      #SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-usuario:5432/db_usuario
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      db-pedido:
+        condition: service_healthy
+    #      kafka:
+    #        condition: service_healthy
+    #      zookeeper:
+    #        condition: service_started
+    restart: on-failure
+    networks:
+      - loja_network
+
+
+#------------------------------------ PEDIDOS ------------------------------------
+  db-pedido:
+    image: postgres:16-alpine
+    container_name: db-pedido
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: db_pedido
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgres_data/pedido:/var/lib/postgresql/data
+    networks:
+      - loja_network
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  pedido-service:
+    build:
+      context: .
+      dockerfile: ./pedido-service/Dockerfile
+    container_name: pedido-service
+    ports:
+      - "8080:8080"
+    environment:
+      #SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-pedido:5432/db_pedido
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      db-pedido:
+        condition: service_healthy
+#      kafka:
+#        condition: service_healthy
+#      zookeeper:
+#        condition: service_started
+    restart: on-failure
+    networks:
+      - loja_network
+
+  #------------------------------------ PAGAMENTOS ------------------------------------
+
+  db-pagamento:
+    image: postgres:16-alpine
+    container_name: db-pagamento
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: db_pagamento
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data/postgres_data/pagamento:/var/lib/postgresql/data
+    networks:
+      - loja_network
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  pagamento-service:
+    build:
+      context: .
+      dockerfile: ./pagamento-service/Dockerfile
+    container_name: pagamento-service
+    ports:
+      - "8082:8082"
+    environment:
+      #SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-pagamento:5432/db_pagamento
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      db-pedido:
+        condition: service_healthy
+    #      kafka:
+    #        condition: service_healthy
+    #      zookeeper:
+    #        condition: service_started
+    restart: on-failure
+    networks:
+      - loja_network
+
+
+networks:
+  loja_network:
+    driver: bridge

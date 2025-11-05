@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "usuario-service", url = "http://localhost:8081")
+@FeignClient(name = "usuario-service", url = "http://usuario-service:8081")
 public interface UsuarioClient {
 
     @GetMapping("/usuarios/usuario-existe/{id}")
